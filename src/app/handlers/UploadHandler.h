@@ -8,7 +8,7 @@
 
 #include <ReceivePartHandler.h>
 
-namespace FQW::Receiver::Handlers
+namespace FQW::Receiver
 {
 
 class UploadHandler : public Poco::Net::HTTPRequestHandler 
@@ -17,24 +17,9 @@ public:
     UploadHandler() = default;
 
     void handleRequest(Poco::Net::HTTPServerRequest& request,
-        Poco::Net::HTTPServerResponse& response) final
-    {
-        try 
-        {
-            Receiver::Handlers::ReceivePartHandler partHandler;
-            Poco::Net::HTMLForm form(request, request.stream(), partHandler);
-
-            response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-            response.send() << "Receive uploaded successfully";
-        }
-        catch (const Poco::Exception& ex) 
-        {
-            response.setStatus(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-            response.send() << "Error: " << ex.displayText();
-        }
-    }
+        Poco::Net::HTTPServerResponse& response) final;
 };
 
-} // namespace FQW::Receiver::Handlers
+} // namespace FQW::Receiver
 
 #endif // __UPLOAD_HANDLER_H__

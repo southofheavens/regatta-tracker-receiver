@@ -1,0 +1,5 @@
+.vscode/
+
+subprojects/*
+!subprojects/fqw-devkit.wrap
+!subprojects/libxml2.wrap

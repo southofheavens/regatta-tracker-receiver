@@ -21,7 +21,7 @@ public:
         const Poco::Net::HTTPServerRequest& request) override
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
-            return new FQW::Receiver::Handlers::UploadHandler;
+            return new FQW::Receiver::UploadHandler;
         }
         else {
             // return new ErrorHandler;
