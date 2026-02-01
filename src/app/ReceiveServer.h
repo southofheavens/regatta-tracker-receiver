@@ -1,6 +1,8 @@
 #ifndef __RECEIVE_SERVER_H__
 #define __RECEIVE_SERVER_H__
 
+#include <iostream>
+
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
@@ -8,6 +10,7 @@
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Exception.h>
+#include <libxml/parser.h>
 
 #include <ReceiveFactory.h>
 
@@ -20,10 +23,12 @@ protected:
     void initialize(Application& self) override
     {
         ServerApplication::initialize(self);
+        xmlInitParser();
     }
 
     void uninitialize() override
     {
+        xmlCleanupParser();
         ServerApplication::uninitialize();
     }
 

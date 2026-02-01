@@ -6,8 +6,6 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTMLForm.h>
 
-#include <ReceivePartHandler.h>
-
 namespace FQW::Receiver
 {
 

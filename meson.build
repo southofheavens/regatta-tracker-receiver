@@ -10,6 +10,9 @@ devkit_dep = dependency('fqw-devkit',
   required: true
 )
 
+
+
+
 libxml2_proj = subproject('libxml2')
 libxml2_dep = libxml2_proj.get_variable('xml_dep')
 
@@ -20,6 +23,7 @@ poco_util = cpp.find_library('PocoUtil', required: true)
 poco_net = cpp.find_library('PocoNet', required: true)
 poco_xml = cpp.find_library('PocoXML', required: true)
 poco_json = cpp.find_library('PocoJSON', required: true)
+poco_crypto = cpp.find_library('PocoCrypto', required: true)
 
 all_deps = [
   poco_foundation,
@@ -27,15 +31,14 @@ all_deps = [
   poco_net,
   poco_xml,
   poco_json,
+  poco_crypto,
   devkit_dep,
-  libxml2_dep
+  libxml2_dep,
 ]
 
 src_files = [
   'src/platform/main.cpp',
-  'src/app/handlers/ReceivePartHandler.cpp',
   'src/app/handlers/UploadHandler.cpp',
-  'src/app/handlers/ReceivePartHandler.cpp',
   'src/app/ReceiveFactory.cpp',
   'src/app/ReceiveServer.cpp',
   'src/app/Utils.cpp'
@@ -44,9 +47,7 @@ src_files = [
 include_dirs = [
   'src',
   'src/app',
-  'src/app/handlers',
-  'subprojects',
-  'subprojects/libxml2/include'
+  'src/app/handlers'
 ]
 
 executable(

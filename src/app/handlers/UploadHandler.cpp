@@ -9,8 +9,8 @@
 #include <Poco/SAX/InputSource.h>
 #include <Poco/SAX/SAXException.h>
 
-#include <fqw-devkit/lib/General.h>
-#include <fqw-devkit/lib/Tokens.h>
+#include <fqw/devkit/General.h>
+#include <fqw/devkit/Tokens.h>
 
 namespace
 {
@@ -40,6 +40,7 @@ try
 
     std::istream & inputStream = request.stream();
     
+    // Проверка размера файла
     std::ostringstream oss;
     uint64_t currentFileSize = 0;
     while (inputStream) 
@@ -54,10 +55,21 @@ try
         oss.write(buffer, inputStream.gcount());
     }
 
+    // Валидация принятого от пользователя файла
     if (not FQW::Receiver::Utils::gpxFileValidate(oss.str())) {
         throw FQW::Devkit::FQWException("The file must match the schema GPX 1.1 from www.topografix.com", 
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
+
+    // Отправляем файл в S3 хранилище
+    FQW::Receiver::Utils::uploadFileToS3(
+        "gpx-files",                
+        "track123.gpx",             
+        oss.str(),                  
+        "http://127.0.0.1:9000",    
+        "minioadmin",               
+        "minioadmin"                
+    );
     
     FQW::Devkit::sendJsonResponse(response, "OK", "OK");
 }
