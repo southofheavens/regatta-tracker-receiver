@@ -14,7 +14,7 @@
 
 #include <ReceiveFactory.h>
 
-namespace FQW::Receiver
+namespace RGT::Receiver
 {
 
 class ReceiveServer : public Poco::Util::ServerApplication
@@ -63,6 +63,6 @@ protected:
     }
 };
 
-} // namespace FQW::Receiver
+} // namespace RGT::Receiver
 
 #endif // __RECEIVE_SERVER_H__

@@ -1,12 +1,12 @@
-project('fqw-receiver', 'cpp',
+project('rgt-receiver', 'cpp',
   default_options: [
     'cpp_std=c++20',
     'c_std=c11'
 ]
 )
 
-devkit_dep = dependency('fqw-devkit',
-  fallback: ['fqw-devkit', 'devkit_dep'],
+devkit_dep = dependency('rgt-devkit',
+  fallback: ['rgt-devkit', 'devkit_dep'],
   required: true
 )
 
@@ -45,9 +45,7 @@ src_files = [
 ]
 
 include_dirs = [
-  'src',
-  'src/app',
-  'src/app/handlers'
+  'src/app'
 ]
 
 executable(

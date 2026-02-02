@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include <fqw/devkit/General.h>
+#include <rgt/devkit/General.h>
 
 #include <Poco/TemporaryFile.h>
 #include <Poco/Net/HTTPClientSession.h>
@@ -62,7 +62,7 @@ std::string hmacSha256(const std::string & key, const std::string & data)
 
 } // namespace 
 
-namespace FQW::Receiver::Utils
+namespace RGT::Receiver::Utils
 {
 
 bool gpxFileValidate(const std::string & data)
@@ -73,13 +73,13 @@ bool gpxFileValidate(const std::string & data)
         tempGpx.createFile();
     } 
     catch (...) {
-        throw FQW::Devkit::FQWException("Internal server error. Try repeating the request", 
+        throw RGT::Devkit::RGTException("Internal server error. Try repeating the request", 
             Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     std::ofstream ofs(tempGpx.path(), std::ios::binary);
     if (not ofs.is_open()) {
-        throw FQW::Devkit::FQWException("Internal server error. Try repeating the request", 
+        throw RGT::Devkit::RGTException("Internal server error. Try repeating the request", 
             Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
 
@@ -126,7 +126,7 @@ bool gpxFileValidate(const std::string & data)
             xmlFreeDoc(doc);
         }
 
-        throw FQW::Devkit::FQWException("An error occurred while validating the received file", 
+        throw RGT::Devkit::RGTException("An error occurred while validating the received file", 
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
@@ -147,7 +147,7 @@ bool gpxFileValidate(const std::string & data)
 /// @param endpoint URL сервера MinIO/S3, например "http://127.0.0.1:9000"
 /// @param accessKey Access Key
 /// @param secretKey Secret Key
-/// @throw FQWException при ошибке
+/// @throw RGTException при ошибке
 void uploadFileToS3(const std::string& bucket, const std::string& objectName, const std::string& data,
     const std::string& endpoint, const std::string& accessKey, const std::string& secretKey)
 try
@@ -225,10 +225,10 @@ try
 }
 catch (const std::exception & e)
 {
-    throw FQW::Devkit::FQWException(
+    throw RGT::Devkit::RGTException(
         "Failed to upload file to S3/MinIO: " + std::string(e.what()),
         Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR
     );
 }
 
-} // namespace FQW::Receiver::Utils
+} // namespace RGT::Receiver::Utils

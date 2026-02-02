@@ -1,4 +1,4 @@
-#include <UploadHandler.h>
+#include <handlers/UploadHandler.h>
 #include <Utils.h>
 
 #include <sstream>
@@ -9,11 +9,11 @@
 #include <Poco/SAX/InputSource.h>
 #include <Poco/SAX/SAXException.h>
 
-#include <fqw/devkit/General.h>
-#include <fqw/devkit/Tokens.h>
+#include <rgt/devkit/General.h>
+#include <rgt/devkit/Tokens.h>
 
 namespace
-{
+{ 
 
 // Максимальный размер gpx файла - 10 megabytes
 constexpr uint64_t max_file_size = 1024 * 1024 * 10;
@@ -22,7 +22,7 @@ constexpr uint16_t buffer_size = 8096;
 
 } // namespace
 
-namespace FQW::Receiver
+namespace RGT::Receiver
 {
 
 void UploadHandler::handleRequest(Poco::Net::HTTPServerRequest & request,
@@ -30,13 +30,13 @@ void UploadHandler::handleRequest(Poco::Net::HTTPServerRequest & request,
 try
 {
     if (request.getContentType().find("application/gpx+xml") == std::string::npos) {
-        throw FQW::Devkit::FQWException("Content-Type must be application/gpx+xml",
+        throw RGT::Devkit::RGTException("Content-Type must be application/gpx+xml",
             Poco::Net::HTTPResponse::HTTPStatus::HTTP_BAD_REQUEST);
     }
 
-    std::string accessToken = FQW::Devkit::Tokens::extractTokenFromRequest(request);
+    std::string accessToken = RGT::Devkit::Tokens::extractTokenFromRequest(request);
 
-    FQW::Devkit::Tokens::Payload payload = FQW::Devkit::Tokens::extractPayload(accessToken);
+    RGT::Devkit::Tokens::Payload payload = RGT::Devkit::Tokens::extractPayload(accessToken);
 
     std::istream & inputStream = request.stream();
     
@@ -49,20 +49,20 @@ try
         inputStream.read(buffer, buffer_size);
         currentFileSize += inputStream.gcount();
         if (currentFileSize > max_file_size) {
-            throw FQW::Devkit::FQWException("Max file size is 10 megabyte", 
+            throw RGT::Devkit::RGTException("Max file size is 10 megabyte", 
                 Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
         }
         oss.write(buffer, inputStream.gcount());
     }
 
     // Валидация принятого от пользователя файла
-    if (not FQW::Receiver::Utils::gpxFileValidate(oss.str())) {
-        throw FQW::Devkit::FQWException("The file must match the schema GPX 1.1 from www.topografix.com", 
+    if (not RGT::Receiver::Utils::gpxFileValidate(oss.str())) {
+        throw RGT::Devkit::RGTException("The file must match the schema GPX 1.1 from www.topografix.com", 
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
     // Отправляем файл в S3 хранилище
-    FQW::Receiver::Utils::uploadFileToS3(
+    RGT::Receiver::Utils::uploadFileToS3(
         "gpx-files",                
         "track123.gpx",             
         oss.str(),                  
@@ -71,17 +71,17 @@ try
         "minioadmin"                
     );
     
-    FQW::Devkit::sendJsonResponse(response, "OK", "OK");
+    RGT::Devkit::sendJsonResponse(response, "OK", "OK");
 }
-catch (FQW::Devkit::FQWException & e)
+catch (RGT::Devkit::RGTException & e)
 {
     response.setStatusAndReason(e.status());
-    FQW::Devkit::sendJsonResponse(response, "error", e.what());
+    RGT::Devkit::sendJsonResponse(response, "error", e.what());
 }
 catch (...)
 {
     response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
-    FQW::Devkit::sendJsonResponse(response, "error", "Internal server error. Try repeating the request");
+    RGT::Devkit::sendJsonResponse(response, "error", "Internal server error. Try repeating the request");
 }
 
-} // namespace FQW::Receiver
+} // namespace RGT::Receiver

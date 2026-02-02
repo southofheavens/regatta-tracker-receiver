@@ -6,7 +6,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/HTMLForm.h>
 
-namespace FQW::Receiver
+namespace RGT::Receiver
 {
 
 class UploadHandler : public Poco::Net::HTTPRequestHandler 
@@ -18,6 +18,6 @@ public:
         Poco::Net::HTTPServerResponse& response) final;
 };
 
-} // namespace FQW::Receiver
+} // namespace RGT::Receiver
 
 #endif // __UPLOAD_HANDLER_H__

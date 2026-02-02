@@ -11,7 +11,7 @@
 
 #include <handlers/UploadHandler.h>
 
-namespace FQW::Receiver
+namespace RGT::Receiver
 {
 
 class ReceiveFactory : public Poco::Net::HTTPRequestHandlerFactory 
@@ -21,7 +21,7 @@ public:
         const Poco::Net::HTTPServerRequest& request) override
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
-            return new FQW::Receiver::UploadHandler;
+            return new RGT::Receiver::UploadHandler;
         }
         else {
             // return new ErrorHandler;
@@ -29,6 +29,6 @@ public:
     }
 };
 
-} // namespace FQW::Receiver
+} // namespace RGT::Receiver
 
 #endif // __RECEIVE_FACTORY_H__
