@@ -14,8 +14,8 @@ class UploadHandler : public Poco::Net::HTTPRequestHandler
 public:
     UploadHandler() = default;
 
-    void handleRequest(Poco::Net::HTTPServerRequest& request,
-        Poco::Net::HTTPServerResponse& response) final;
+    void handleRequest(Poco::Net::HTTPServerRequest & request, 
+        Poco::Net::HTTPServerResponse & response) final;
 };
 
 } // namespace RGT::Receiver

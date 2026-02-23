@@ -17,8 +17,7 @@ namespace RGT::Receiver
 class ReceiveFactory : public Poco::Net::HTTPRequestHandlerFactory 
 {
 public:
-    Poco::Net::HTTPRequestHandler* createRequestHandler(
-        const Poco::Net::HTTPServerRequest& request) override
+    Poco::Net::HTTPRequestHandler * createRequestHandler(const Poco::Net::HTTPServerRequest & request) final
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
             return new RGT::Receiver::UploadHandler;

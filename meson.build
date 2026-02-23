@@ -10,12 +10,6 @@ devkit_dep = dependency('rgt-devkit',
   required: true
 )
 
-
-
-
-libxml2_proj = subproject('libxml2')
-libxml2_dep = libxml2_proj.get_variable('xml_dep')
-
 cpp = meson.get_compiler('cpp')
 
 poco_foundation = cpp.find_library('PocoFoundation', required: true)
@@ -33,14 +27,11 @@ all_deps = [
   poco_json,
   poco_crypto,
   devkit_dep,
-  libxml2_dep,
 ]
 
 src_files = [
   'src/platform/main.cpp',
   'src/app/handlers/UploadHandler.cpp',
-  'src/app/ReceiveFactory.cpp',
-  'src/app/ReceiveServer.cpp',
   'src/app/Utils.cpp'
 ]
 
@@ -49,11 +40,14 @@ include_dirs = [
 ]
 
 executable(
-  'main',
+  'rgt-receiver',
   src_files,
   include_directories: include_dirs,
   cpp_args: '-std=c++20',
-  dependencies: all_deps
+  dependencies: all_deps,
+  link_args: [
+    '-Wl,-rpath,@executable_path/../lib',      # ищет рядом с бинарником
+    '-Wl,-rpath,/opt/homebrew/lib',            # Homebrew на Apple Silicon
+    '-Wl,-rpath,/usr/local/lib',               # Homebrew на Intel Mac
+  ]
 )
-
-# DYLD_LIBRARY_PATH=/usr/local/lib ./build/main

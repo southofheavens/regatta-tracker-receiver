@@ -10,7 +10,6 @@
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Exception.h>
-#include <libxml/parser.h>
 
 #include <ReceiveFactory.h>
 
@@ -20,46 +19,44 @@ namespace RGT::Receiver
 class ReceiveServer : public Poco::Util::ServerApplication
 {
 protected:
-    void initialize(Application& self) override
+    void initialize(Application & self) final
     {
+        loadConfiguration();
         ServerApplication::initialize(self);
-        xmlInitParser();
     }
 
-    void uninitialize() override
+    void uninitialize() final
     {
-        xmlCleanupParser();
         ServerApplication::uninitialize();
     }
 
-    int main(const std::vector<std::string>&) override
+    int main(const std::vector<std::string>&) final
+    try
     {
-        try
-        {
-            Poco::Net::ServerSocket svs(8081);
-            
-            Poco::Net::HTTPServer srv
-            (
-                new ReceiveFactory, 
-                svs, 
-                new Poco::Net::HTTPServerParams
-            );
+        Poco::Util::LayeredConfiguration & cfg = ReceiveServer::config();
 
-            srv.start();
-            std::cout << "Сервер запущен на порту 8081..." << std::endl;
-            
-            waitForTerminationRequest();
-            
-            srv.stop();
-            
-            return Application::EXIT_OK;
-        }
-        catch (const Poco::Exception& e) {
-            std::cerr << e.displayText() << '\n';
-        }
-        catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
-        }
+        Poco::Net::ServerSocket svs(cfg.getUInt16("server.port"));
+        
+        Poco::Net::HTTPServer srv
+        (
+            new ReceiveFactory, 
+            svs, 
+            new Poco::Net::HTTPServerParams
+        );
+
+        srv.start();
+        
+        waitForTerminationRequest();
+        
+        srv.stop();
+        
+        return Application::EXIT_OK;
+    }
+    catch (const Poco::Exception & e) {
+        std::cerr << e.displayText() << '\n';
+    }
+    catch (const std::exception & e) {
+        std::cerr << e.what() << '\n';
     }
 };
 

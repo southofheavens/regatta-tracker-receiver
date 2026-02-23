@@ -2,4 +2,3 @@
 
 subprojects/*
 !subprojects/rgt-devkit.wrap
-!subprojects/libxml2.wrap
