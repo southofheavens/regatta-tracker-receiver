@@ -39,7 +39,7 @@ protected:
         
         Poco::Net::HTTPServer srv
         (
-            new ReceiveFactory, 
+            new ReceiveFactory(cfg), 
             svs, 
             new Poco::Net::HTTPServerParams
         );

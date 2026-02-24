@@ -17,15 +17,23 @@ namespace RGT::Receiver
 class ReceiveFactory : public Poco::Net::HTTPRequestHandlerFactory 
 {
 public:
+    ReceiveFactory(Poco::Util::LayeredConfiguration & cfg) : cfg_{cfg}
+    {
+    }
+
+private:
     Poco::Net::HTTPRequestHandler * createRequestHandler(const Poco::Net::HTTPServerRequest & request) final
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
-            return new RGT::Receiver::UploadHandler;
+            return new RGT::Receiver::UploadHandler(cfg_);
         }
         else {
             // return new ErrorHandler;
         }
     }
+
+private:
+    Poco::Util::LayeredConfiguration & cfg_;
 };
 
 } // namespace RGT::Receiver
