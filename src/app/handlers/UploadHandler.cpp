@@ -1,48 +1,66 @@
 #include <handlers/UploadHandler.h>
 #include <rgt/devkit/Tokens.h>
 #include <rgt/devkit/General.h>
-
-namespace 
-{
-
-/// @brief Примитивная валидация запроса
-/// @param req ссылка на запрос
-/// @param cfg ссылка на конфиг
-/// @throw RGT::Devkit::RGTException если запрос некорректен
-void primitiveRequestValidate(Poco::Net::HTTPServerRequest & req, Poco::Util::LayeredConfiguration & cfg)
-{
-    if (req.getContentLength() == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH) {
-        throw RGT::Devkit::RGTException("Content length is unknown", 
-            Poco::Net::HTTPResponse::HTTPStatus::HTTP_BAD_REQUEST);
-    }
-
-    if (req.getContentLength64() > cfg.getUInt16("max_request_body_size")) {
-        throw RGT::Devkit::RGTException("Content size must not exceed 1 kilobyte",
-            Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-    }
-
-    if (req.getContentLength() == 0) {
-        throw RGT::Devkit::RGTException("Content length is zero", 
-            Poco::Net::HTTPResponse::HTTPStatus::HTTP_BAD_REQUEST);
-    }
-
-    if (req.getContentType().find("application/json") == std::string::npos) {
-        throw RGT::Devkit::RGTException("Content-Type must be application/json", 
-            Poco::Net::HTTPResponse::HTTPStatus::HTTP_BAD_REQUEST);
-    }
-}
-
-} // namespace
+#include <rgt/devkit/RGTException.h>
+#include <rgt/devkit/RequestProcessing.h>
+#include <Poco/DateTime.h>
+#include <Poco/Net/HTTPResponse.h>
 
 namespace RGT::Receiver
 {
 
-void UploadHandler::handleRequest(Poco::Net::HTTPServerRequest & request, 
-    Poco::Net::HTTPServerResponse & response)
+void UploadHandler::requestPreprocessing(Poco::Net::HTTPServerRequest & request)
 {
-    // Проводим примитивную валидацию запроса 
-    primitiveRequestValidate(request, cfg_);
+    RGT::Devkit::checkContentLength(request, cfg_.getUInt16("max_request_body_size"));
+    RGT::Devkit::checkContentLengthIsNull(request);
+    RGT::Devkit::checkContentType(request, "application/json");
+}
 
+std::any UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request)
+{
+    Poco::JSON::Object::Ptr json = RGT::Devkit::extractJsonObjectFromRequest(request);
+
+    Poco::Dynamic::Var dvTimeIso = RGT::Devkit::extractValueFromJson(json, "time");
+    std::string timeIso;
+    try {
+        timeIso = dvTimeIso.extract<std::string>();
+    }
+    catch(...) {
+        throw RGT::Devkit::RGTException("The value for the key \"time\" must be a string in ISO 8601 format",
+            Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+    }
+
+    Poco::Dynamic::Var dvLongitude = RGT::Devkit::extractValueFromJson(json, "longitude");
+    double longitude;
+    try {
+        longitude = dvLongitude.extract<double>();
+    }
+    catch(...) {
+        throw RGT::Devkit::RGTException("The value for the key \"longitude\" must be a floating-point number",
+            Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+    }
+
+    Poco::Dynamic::Var dvLatitude = RGT::Devkit::extractValueFromJson(json, "latitude");
+    double latitude;
+    try {
+        latitude = dvLatitude.extract<double>();
+    }
+    catch(...) {
+        throw RGT::Devkit::RGTException("The value for the key \"latitude\" must be a floating-point number",
+            Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+    }
+
+    return Payload
+    {
+        .isoTimestamp = timeIso,
+        .longitude = longitude,
+        .latitude = latitude
+    };
+}
+
+void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Poco::Net::HTTPServerResponse & response)
+{
+    Payload payload = std::any_cast<Payload>(payload_);
 }
 
 } // namespace RGT::Receiver
