@@ -2,20 +2,27 @@
 #define __UPLOAD_HANDLER_H__
 
 #include <rgt/devkit/HTTPRequestHandler.h>
+#include <rgt/devkit/JWTPayload.h>
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
-#include <Poco/Net/HTMLForm.h>
 #include <Poco/Util/LayeredConfiguration.h>
+#include <Poco/ObjectPool.h>
+#include <Poco/Redis/Client.h>
 
 namespace RGT::Receiver
 {
 
 class UploadHandler : public RGT::Devkit::HTTPRequestHandler 
 {
+private:
+    using RedisClientObjectPool = Poco::ObjectPool<Poco::Redis::Client, Poco::Redis::Client::Ptr>;
+
 public:
-    UploadHandler(Poco::Util::LayeredConfiguration & cfg) : cfg_{cfg}
+    UploadHandler(Poco::Util::LayeredConfiguration & cfg, RedisClientObjectPool & redisPool) 
+        : cfg_{cfg}
+        , redisPool_{redisPool}
     {
     }
 
@@ -27,14 +34,17 @@ private:
     virtual void requestProcessing(Poco::Net::HTTPServerRequest & request, Poco::Net::HTTPServerResponse & response) final;
 
 private:
-    Poco::Util::LayeredConfiguration & cfg_;
-
-    struct Payload
+    struct RequiredPayload
     {
+        RGT::Devkit::JWTPayload tokenPayload;
+
         std::string isoTimestamp;
         double longitude;
         double latitude;
     };
+
+    Poco::Util::LayeredConfiguration & cfg_;
+    RedisClientObjectPool            & redisPool_;
 };
 
 } // namespace RGT::Receiver

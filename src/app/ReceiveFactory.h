@@ -16,8 +16,13 @@ namespace RGT::Receiver
 
 class ReceiveFactory : public Poco::Net::HTTPRequestHandlerFactory 
 {
+private:
+    using RedisClientObjectPool = Poco::ObjectPool<Poco::Redis::Client, Poco::Redis::Client::Ptr>;
+
 public:
-    ReceiveFactory(Poco::Util::LayeredConfiguration & cfg) : cfg_{cfg}
+    ReceiveFactory(Poco::Util::LayeredConfiguration & cfg, RedisClientObjectPool & redisPool) 
+        : cfg_{cfg}
+        , redisPool_{redisPool}
     {
     }
 
@@ -25,7 +30,7 @@ private:
     Poco::Net::HTTPRequestHandler * createRequestHandler(const Poco::Net::HTTPServerRequest & request) final
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
-            return new RGT::Receiver::UploadHandler(cfg_);
+            return new RGT::Receiver::UploadHandler(cfg_, redisPool_);
         }
         else {
             // return new ErrorHandler;
@@ -34,6 +39,7 @@ private:
 
 private:
     Poco::Util::LayeredConfiguration & cfg_;
+    RedisClientObjectPool            & redisPool_;
 };
 
 } // namespace RGT::Receiver
