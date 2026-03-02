@@ -39,6 +39,9 @@ void UploadHandler::requestPreprocessing(Poco::Net::HTTPServerRequest & request)
 
 std::any UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request)
 {
+    std::string accessToken = HTTPRequestHandler::extractTokenFromRequest(request);
+    RGT::Devkit::JWTPayload jwtPayload = HTTPRequestHandler::extractPayload(accessToken);
+
     Poco::JSON::Object::Ptr json = HTTPRequestHandler::extractJsonObjectFromRequest(request);
 
     Poco::Dynamic::Var dvTimeIso = HTTPRequestHandler::extractValueFromJson(json, "time");
@@ -73,6 +76,7 @@ std::any UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest &
 
     return RequiredPayload
     {
+        .tokenPayload = jwtPayload,
         .isoTimestamp = timeIso,
         .longitude = longitude,
         .latitude = latitude
@@ -83,6 +87,11 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
 {
     RequiredPayload requiredPayload = std::any_cast<RequiredPayload>(payload_);
 
+    if (not (requiredPayload.tokenPayload.role == "Participant")) {
+        throw RGT::Devkit::RGTException("Only participant can upload location",
+            Poco::Net::HTTPResponse::HTTP_FORBIDDEN);
+    }
+
     Poco::DateTime dt;
     int tzd = 0;
     if (not Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FRAC_FORMAT, requiredPayload.isoTimestamp, dt, tzd))
@@ -91,6 +100,7 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
             "2005-01-01T12:00:00.000000+01:00, 2005-01-01T11:00:00.000000Z",
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
+    dt.makeUTC(tzd);
     Poco::Timestamp::TimeVal microseconds = dt.timestamp().epochMicroseconds();
 
     if (not isLongitudeCorrect(requiredPayload.longitude)) {
@@ -103,11 +113,6 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    // ключ назовём user_participation:<id>
-    // проверяем, есть ли в redis ключ std::format("user_participant:{}", requiredPayload.tokenPayload.sub)
-    // если нет, то возвращаем пользователю статус ОК и сообщение "The race either did not start or ended. The data passed in the request was not saved"
-    // если да, то добавляем в список с ключом std::format("user_participant:{}", requiredPayload.tokenPayload.sub) 
-    // значение "requiredPayload.longitude;requiredPayload.latitude;microseconds"
     
 }
 
