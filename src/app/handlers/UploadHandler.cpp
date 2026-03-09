@@ -5,6 +5,7 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeFormat.h>
+#include <Utils.h>
 
 namespace
 {
@@ -113,7 +114,16 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    
+    bool saveResult = RGT::Receiver::Utils::saveUserLocation(redisPool_, requiredPayload.tokenPayload.sub,
+        requiredPayload.longitude, requiredPayload.latitude, microseconds);
+
+    if (saveResult) {
+        HTTPRequestHandler::sendJsonResponse(response, "OK", "OK");
+    }
+    else {
+        HTTPRequestHandler::sendJsonResponse(response, "OK", "The race either didn't start or ended. "
+            "The received coordinates were not saved");
+    }
 }
 
 } // namespace RGT::Receiver

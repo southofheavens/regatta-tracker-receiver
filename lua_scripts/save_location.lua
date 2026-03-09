@@ -5,8 +5,8 @@ local key = KEYS[1]
 local value = ARGV[1] .. ";" .. ARGV[2] .. ";" .. ARGV[3]
 
 if redis.call("EXISTS", key) == 0 then
-    return false
+    return 0
 else
     redis.call("RPUSH", key, value)
-    return true
+    return 1
 end

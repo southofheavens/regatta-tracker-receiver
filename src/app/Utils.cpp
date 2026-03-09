@@ -1,6 +1,9 @@
 #include <rgt/devkit/General.h>
+#include <rgt/devkit/RGTException.h>
 
 #include <Utils.h>
+
+#include <Poco/Redis/PoolableConnectionFactory.h>
 
 namespace RGT::Receiver::Utils
 {
@@ -10,7 +13,25 @@ bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId
 {
     static std::string luaScript = RGT::Devkit::readLuaScript("lua_scripts/save_location.lua");
 
-    
+    Poco::Redis::Array cmd;
+    cmd << "EVAL"
+        << luaScript
+        << "1"
+        << std::format("user_participation:{}", userId)
+        << std::to_string(longitude)
+        << std::to_string(latitude)
+        << std::to_string(microsecondsSinceEpoch);
+
+    try
+    {
+        Poco::Redis::PooledConnection pc(redisPool, 500);
+        Poco::Int64 resultOfCmd = static_cast<Poco::Redis::Client::Ptr>(pc)->execute<Poco::Int64>(cmd);
+        return resultOfCmd != 0 ? true : false;
+    }
+    catch (...) {
+        throw RGT::Devkit::RGTException("Internal server error. Try repeating the request.",
+            Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+    }
 }
 
 } // namespace RGT::Receiver::Utils
