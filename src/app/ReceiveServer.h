@@ -1,7 +1,7 @@
 #ifndef __RECEIVE_SERVER_H__
 #define __RECEIVE_SERVER_H__
 
-#include <rgt/devkit/Connections.h>
+#include <rgt/devkit/subsystems/RedisSubsystem.h>
 
 #include <iostream>
 
@@ -26,18 +26,14 @@ private:
     void initialize(Application & self) final
     {
         loadConfiguration();
+
+        Poco::Util::Application::addSubsystem(new RGT::Devkit::Subsystems::RedisSubsystem());
+
         ServerApplication::initialize(self);
-
-        const Poco::Util::LayeredConfiguration & cfg = ReceiveServer::config();
-
-        redisPool_ = RGT::Devkit::connectToRedis(cfg.getString("redis.host"), cfg.getString("redis.port"),
-            cfg.getUInt16("redis.min_sessions"), cfg.getUInt16("redis.max_sessions"));
     }
 
     void uninitialize() final
-    {
-        ServerApplication::uninitialize();
-    }
+    { ServerApplication::uninitialize(); }
 
     int main(const std::vector<std::string>&) final
     try
@@ -45,10 +41,12 @@ private:
         Poco::Util::LayeredConfiguration & cfg = ReceiveServer::config();
 
         Poco::Net::ServerSocket svs(cfg.getUInt16("server.port"));
+
+        auto & redisSubsystem = Poco::Util::Application::getSubsystem<Devkit::Subsystems::RedisSubsystem>();
         
         Poco::Net::HTTPServer srv
         (
-            new ReceiveFactory(cfg, *redisPool_), 
+            new ReceiveFactory(cfg, redisSubsystem.getPool()), 
             svs, 
             new Poco::Net::HTTPServerParams
         );
@@ -67,11 +65,6 @@ private:
     catch (const std::exception & e) {
         std::cerr << e.what() << '\n';
     }
-
-private:
-    using RedisClientObjectPool = Poco::ObjectPool<Poco::Redis::Client, Poco::Redis::Client::Ptr>;
-
-    std::unique_ptr<RedisClientObjectPool> redisPool_;
 };
 
 } // namespace RGT::Receiver

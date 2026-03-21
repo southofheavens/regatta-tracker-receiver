@@ -4,3 +4,5 @@ subprojects/*
 !subprojects/rgt-devkit.wrap
 
 .DS_Store
+
+.env
