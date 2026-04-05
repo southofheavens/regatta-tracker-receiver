@@ -31,7 +31,7 @@ all_deps = [
 
 src_files = [
   'src/app/main.cpp',
-  'src/platform/handlers/UploadHandler.cpp',
+  'src/platform/Handlers/UploadHandler.cpp',
   'src/platform/Utils.cpp'
 ]
 
