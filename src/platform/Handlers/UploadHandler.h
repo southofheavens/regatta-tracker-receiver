@@ -1,8 +1,7 @@
-#ifndef __UPLOAD_HANDLER_H__
-#define __UPLOAD_HANDLER_H__
+#pragma once
 
-#include <rgt/devkit/HTTPRequestHandler.h>
-#include <rgt/devkit/JWTPayload.h>
+#include <RGT/Devkit/HTTPRequestHandler.h>
+#include <RGT/Devkit/JWTPayload.h>
 
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
@@ -11,7 +10,7 @@
 #include <Poco/ObjectPool.h>
 #include <Poco/Redis/Client.h>
 
-namespace RGT::Receiver
+namespace RGT::Receiver::Handlers
 {
 
 class UploadHandler : public RGT::Devkit::HTTPRequestHandler 
@@ -47,6 +46,4 @@ private:
     RedisClientObjectPool            & redisPool_;
 };
 
-} // namespace RGT::Receiver
-
-#endif // __UPLOAD_HANDLER_H__
+} // namespace RGT::Receiver::Handlers

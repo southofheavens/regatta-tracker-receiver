@@ -1,5 +1,5 @@
-#include <handlers/UploadHandler.h>
-#include <rgt/devkit/RGTException.h>
+#include <Handlers/UploadHandler.h>
+#include <RGT/Devkit/RGTException.h>
 #include <Poco/DateTime.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/DateTimeParser.h>
@@ -28,7 +28,7 @@ bool isLatitudeCorrect(const double & latitude) noexcept
 
 } // namespace
 
-namespace RGT::Receiver
+namespace RGT::Receiver::Handlers
 {
 
 void UploadHandler::requestPreprocessing(Poco::Net::HTTPServerRequest & request)
@@ -114,7 +114,7 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    bool saveResult = RGT::Receiver::Utils::saveUserLocation(redisPool_, requiredPayload.tokenPayload.sub,
+    bool saveResult = RGT::Receiver::saveUserLocation(redisPool_, requiredPayload.tokenPayload.sub,
         requiredPayload.longitude, requiredPayload.latitude, microseconds);
 
     if (saveResult) {
@@ -126,4 +126,4 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
     }
 }
 
-} // namespace RGT::Receiver
+} // namespace RGT::Receiver::Handlers

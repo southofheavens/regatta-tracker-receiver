@@ -1,11 +1,11 @@
-#include <rgt/devkit/General.h>
-#include <rgt/devkit/RGTException.h>
+#include <RGT/Devkit/General.h>
+#include <RGT/Devkit/RGTException.h>
 
 #include <Utils.h>
 
 #include <Poco/Redis/PoolableConnectionFactory.h>
 
-namespace RGT::Receiver::Utils
+namespace RGT::Receiver
 {
 
 bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId, const double & longitude, 
@@ -34,4 +34,4 @@ bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId
     }
 }
 
-} // namespace RGT::Receiver::Utils
+} // namespace RGT::Receiver

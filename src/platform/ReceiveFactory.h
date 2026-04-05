@@ -1,5 +1,4 @@
-#ifndef __RECEIVE_FACTORY_H__
-#define __RECEIVE_FACTORY_H__
+#pragma once
 
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -9,7 +8,7 @@
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Exception.h>
 
-#include <handlers/UploadHandler.h>
+#include <Handlers/UploadHandler.h>
 
 namespace RGT::Receiver
 {
@@ -30,7 +29,7 @@ private:
     Poco::Net::HTTPRequestHandler * createRequestHandler(const Poco::Net::HTTPServerRequest & request) final
     {
         if (request.getURI() == "/upload" and request.getMethod() == "POST") {
-            return new RGT::Receiver::UploadHandler(cfg_, redisPool_);
+            return new RGT::Receiver::Handlers::UploadHandler(cfg_, redisPool_);
         }
         else {
             // return new ErrorHandler;
@@ -43,5 +42,3 @@ private:
 };
 
 } // namespace RGT::Receiver
-
-#endif // __RECEIVE_FACTORY_H__

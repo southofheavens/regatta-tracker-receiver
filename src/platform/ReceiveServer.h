@@ -1,7 +1,6 @@
-#ifndef __RECEIVE_SERVER_H__
-#define __RECEIVE_SERVER_H__
+#pragma once
 
-#include <rgt/devkit/subsystems/RedisSubsystem.h>
+#include <RGT/Devkit/Subsystems/RedisSubsystem.h>
 
 #include <iostream>
 
@@ -68,5 +67,3 @@ private:
 };
 
 } // namespace RGT::Receiver
-
-#endif // __RECEIVE_SERVER_H__

@@ -30,13 +30,13 @@ all_deps = [
 ]
 
 src_files = [
-  'src/platform/main.cpp',
-  'src/app/handlers/UploadHandler.cpp',
-  'src/app/Utils.cpp'
+  'src/app/main.cpp',
+  'src/platform/handlers/UploadHandler.cpp',
+  'src/platform/Utils.cpp'
 ]
 
 include_dirs = [
-  'src/app'
+  'src/platform'
 ]
 
 executable(
