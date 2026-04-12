@@ -9,6 +9,7 @@
 #include <Poco/Exception.h>
 
 #include <Handlers/UploadHandler.h>
+#include <RGT/Devkit/ErrorHandler.h>
 
 namespace RGT::Receiver
 {
@@ -32,7 +33,7 @@ private:
             return new RGT::Receiver::Handlers::UploadHandler(cfg_, redisPool_);
         }
         else {
-            // return new ErrorHandler;
+            return new RGT::Devkit::ErrorHandler;
         }
     }
 

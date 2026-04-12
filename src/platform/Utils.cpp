@@ -25,7 +25,14 @@ bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId
     try
     {
         Poco::Redis::PooledConnection pc(redisPool, 500);
-        Poco::Int64 resultOfCmd = static_cast<Poco::Redis::Client::Ptr>(pc)->execute<Poco::Int64>(cmd); // TODO ТУТ МОЖЕТ БЫТЬ ОБРАЩЕНИЕ К НУЛЕВОМУ УКАЗАТЕЛЮ!
+        Poco::Redis::Client::Ptr redisClient = static_cast<Poco::Redis::Client::Ptr>(pc);
+        if (redisClient == nullptr)
+        {
+            // TODO лог
+            throw std::exception{};
+        }
+
+        Poco::Int64 resultOfCmd = redisClient->execute<Poco::Int64>(cmd); 
         return resultOfCmd != 0 ? true : false;
     }
     catch (...) {

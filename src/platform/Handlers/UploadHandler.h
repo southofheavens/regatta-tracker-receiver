@@ -28,19 +28,19 @@ public:
 private:
     virtual void requestPreprocessing(Poco::Net::HTTPServerRequest & request) final;
 
-    virtual std::any extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request) final;
+    virtual void extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request) final;
 
     virtual void requestProcessing(Poco::Net::HTTPServerRequest & request, Poco::Net::HTTPServerResponse & response) final;
 
 private:
-    struct RequiredPayload
+    struct
     {
         RGT::Devkit::JWTPayload tokenPayload;
 
         std::string isoTimestamp;
         double longitude;
         double latitude;
-    };
+    } requestPayload_;
 
     Poco::Util::LayeredConfiguration & cfg_;
     RedisClientObjectPool            & redisPool_;

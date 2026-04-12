@@ -38,7 +38,7 @@ void UploadHandler::requestPreprocessing(Poco::Net::HTTPServerRequest & request)
     HTTPRequestHandler::checkContentType(request, "application/json");
 }
 
-std::any UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request)
+void UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest & request)
 {
     std::string accessToken = HTTPRequestHandler::extractTokenFromRequest(request);
     RGT::Devkit::JWTPayload jwtPayload = HTTPRequestHandler::extractPayload(accessToken);
@@ -75,27 +75,22 @@ std::any UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest &
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    return RequiredPayload
-    {
-        .tokenPayload = jwtPayload,
-        .isoTimestamp = timeIso,
-        .longitude = longitude,
-        .latitude = latitude
-    };
+    requestPayload_.tokenPayload = jwtPayload;
+    requestPayload_.isoTimestamp = timeIso;
+    requestPayload_.longitude = longitude;
+    requestPayload_.latitude = latitude;
 }
 
 void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Poco::Net::HTTPServerResponse & response)
 {
-    RequiredPayload requiredPayload = std::any_cast<RequiredPayload>(payload_);
-
-    if (not (requiredPayload.tokenPayload.role == "Participant")) {
+    if (not (requestPayload_.tokenPayload.role == "Participant")) {
         throw RGT::Devkit::RGTException("Only participant can upload location",
             Poco::Net::HTTPResponse::HTTP_FORBIDDEN);
     }
 
     Poco::DateTime dt;
     int tzd = 0;
-    if (not Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FRAC_FORMAT, requiredPayload.isoTimestamp, dt, tzd))
+    if (not Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FRAC_FORMAT, requestPayload_.isoTimestamp, dt, tzd))
     {
         throw RGT::Devkit::RGTException("Time must be presented in ISO8601 format with fractional seconds. Examples: "
             "2005-01-01T12:00:00.000000+01:00, 2005-01-01T11:00:00.000000Z",
@@ -104,23 +99,24 @@ void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Po
     dt.makeUTC(tzd);
     Poco::Timestamp::TimeVal microseconds = dt.timestamp().epochMicroseconds();
 
-    if (not isLongitudeCorrect(requiredPayload.longitude)) {
+    if (not isLongitudeCorrect(requestPayload_.longitude)) {
         throw RGT::Devkit::RGTException("Longitude can take a value from -180 to 180",
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    if (not isLatitudeCorrect(requiredPayload.latitude)) {
+    if (not isLatitudeCorrect(requestPayload_.latitude)) {
         throw RGT::Devkit::RGTException("Latitude can take a value from -90 to 90",
             Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
     }
 
-    bool saveResult = RGT::Receiver::saveUserLocation(redisPool_, requiredPayload.tokenPayload.sub,
-        requiredPayload.longitude, requiredPayload.latitude, microseconds);
+    bool saveResult = RGT::Receiver::saveUserLocation(redisPool_, requestPayload_.tokenPayload.sub,
+        requestPayload_.longitude, requestPayload_.latitude, microseconds);
 
     if (saveResult) {
         HTTPRequestHandler::sendJsonResponse(response, "OK", "OK");
     }
-    else {
+    else 
+    {
         HTTPRequestHandler::sendJsonResponse(response, "OK", "The race either didn't start or ended. "
             "The received coordinates were not saved");
     }

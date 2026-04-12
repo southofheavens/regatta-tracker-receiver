@@ -1,6 +1,7 @@
 #pragma once
 
 #include <RGT/Devkit/Subsystems/RedisSubsystem.h>
+#include <RGT/Devkit/ProjectName.h>
 
 #include <iostream>
 
@@ -13,6 +14,7 @@
 #include <Poco/Exception.h>
 #include <Poco/ObjectPool.h>
 #include <Poco/Redis/Client.h>
+#include <Poco/Util/JSONConfiguration.h>
 
 #include <ReceiveFactory.h>
 
@@ -24,7 +26,14 @@ class ReceiveServer : public Poco::Util::ServerApplication
 private:
     void initialize(Application & self) final
     {
-        loadConfiguration();
+        try
+        {
+            Poco::Util::JSONConfiguration::Ptr cfg = new Poco::Util::JSONConfiguration(RGT::Devkit::getConfigPath());
+            self.config().add(cfg, PRIO_APPLICATION);
+        }
+        catch (const Poco::Exception & e) {
+            throw std::runtime_error(std::format("Error loading JSON config: {}", e.displayText()));
+        }
 
         Poco::Util::Application::addSubsystem(new RGT::Devkit::Subsystems::RedisSubsystem());
 
@@ -58,11 +67,15 @@ private:
         
         return Application::EXIT_OK;
     }
-    catch (const Poco::Exception & e) {
+    catch (const Poco::Exception & e) 
+    {
         std::cerr << e.displayText() << '\n';
+        return Application::EXIT_SOFTWARE;
     }
-    catch (const std::exception & e) {
+    catch (const std::exception & e) 
+    {
         std::cerr << e.what() << '\n';
+        return Application::EXIT_SOFTWARE;
     }
 };
 
