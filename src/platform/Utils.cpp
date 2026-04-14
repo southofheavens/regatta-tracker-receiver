@@ -8,7 +8,7 @@
 namespace RGT::Receiver
 {
 
-bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId, const double & longitude, 
+bool saveUserLocation(RedisClientObjectPool & redisPool, const Devkit::UserId & userId, const double & longitude, 
     const double & latitude, const uint64_t & microsecondsSinceEpoch)
 {
     static std::string luaScript = RGT::Devkit::readLuaScript("lua_scripts/save_location.lua");
@@ -17,7 +17,7 @@ bool saveUserLocation(RedisClientObjectPool & redisPool, const uint64_t & userId
     cmd << "EVAL"
         << luaScript
         << "1"
-        << std::format("user_participation:{}", userId)
+        << std::format("user_participation:{}", Devkit::mapUserIdToUint(userId))
         << std::to_string(longitude)
         << std::to_string(latitude)
         << std::to_string(microsecondsSinceEpoch);

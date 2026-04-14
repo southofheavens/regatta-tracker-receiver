@@ -83,7 +83,7 @@ void UploadHandler::extractPayloadFromRequest(Poco::Net::HTTPServerRequest & req
 
 void UploadHandler::requestProcessing(Poco::Net::HTTPServerRequest & request, Poco::Net::HTTPServerResponse & response)
 {
-    if (not (requestPayload_.tokenPayload.role == "Participant")) {
+    if (not (requestPayload_.tokenPayload.role == RGT::Devkit::UserRole::Participant)) {
         throw RGT::Devkit::RGTException("Only participant can upload location",
             Poco::Net::HTTPResponse::HTTP_FORBIDDEN);
     }
